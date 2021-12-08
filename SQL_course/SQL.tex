@@ -1,0 +1,353 @@
+\documentclass[]{article}
+
+%opening
+\title{Notes on SQL}
+\author{Will Steinhardt}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+These notes will summarize the basics of relational databases and SQL.
+\end{abstract}
+
+\section{Glossary of terms}
+\begin{itemize}
+	\item relational database - a table of data organized into columns and rows.
+	\item DBMS - database management system - software for managing a database.
+	\item RDBMS - set of software that controls data, i.e. access, organization, and storage.  Includes SQL, Oracle Database, DB2 Warehouse, etc.
+	\item DML statements- Data Manipulation Language statements - used to read and modify data. 
+	\item predicate - evaluates to true, false, or unknown (as needed in the WHERE clause)
+\end{itemize}
+
+\section{Introduction to SQL}
+SQL stands for "Structured Query Language" and is an example of a RDBMS. 
+
+Some simple tasks that can be accomplished with SQL are the creation of a table, insertion of data in a table, deletion of data from a table, selection of data from a table, and updating of data in a table.
+
+\subsection{SELECT command}
+This command is an example of a query used to retrieve data by selecting columns in a table.
+
+In the simplest example, we can get an entire table with the command:
+
+\begin{verbatim}
+SELECT * FROM <table name>;
+\end{verbatim}
+
+We can restrict output by specifying the columns 
+\begin{verbatim}
+SELECT <column_1,  ..., column_n>  FROM <table_name>;
+\end{verbatim}
+
+and can further constrain results
+using the WHERE clause and an accompanying predicate, i.e.:
+
+\begin{verbatim}
+SELECT SELECT <column_1,  ..., column_n>  FROM <table_name> WHERE <predicate>;
+\end{verbatim}
+
+
+\subsection{COUNT function}
+
+In order to count the number of entries in a table you can use the following command:
+
+\begin{verbatim}
+SELECT COUNT(*) FROM <table name>;
+\end{verbatim}
+
+By the same token, if you wanted to count according to a particular criterion, you could do so in the following way:
+
+\begin{verbatim}
+SELECT COUNT(<column name>) WHERE <predicate>;
+\end{verbatim}
+
+\subsection{DISTINCT}
+
+In order to remove duplicate values from a result set, use the \verb DISTINCT  statement:
+
+\begin{verbatim}
+SELECT DISTINCT <column name> FROM <table name> WHERE <predicate>;
+\end{verbatim}
+
+\subsection{LIMIT}
+
+You can restrict the output set to the first \emph{n} results by appending your selection in the following way:
+
+\begin{verbatim}
+SELECT * FROM <table name> LIMIT <n>;
+\end{verbatim}
+
+Of course, this can also be used in conjunction with other statements:
+
+\begin{verbatim}
+SELECT <column name> FROM <table name> WHERE <predicate> LIMIT <n>;
+\end{verbatim}
+
+/subsection{INSERT}
+
+This is another example of a DML statement, used for inserting rows into a table.
+
+\subsection{INSERT}
+
+We can add new rows to the table by using the \verb INSERT  statement:
+
+\begin{verbatim}
+INSERT INTO  <table name> (<column name 1, ... column name n>) 
+	VALUES (<value 1, ..., value n>);
+\end{verbatim}
+
+If multiple sets of values are included in parentheses separated by commas, multiple rows may be added simultaneously.
+
+\subsection{UPDATE}
+
+To modify the value of a column, one can use the following command:
+
+\begin{verbatim}
+UPDATE <table name> SET <column name> = <value> WHERE <predicate>;
+\end{verbatim}
+
+Here the use of the \verb WHERE   clause is particularly important, because you likely do not want to change all rows of a table.
+
+\subsection{DELETE}
+
+\verb DELETE  can be used to remove rows from a table using the following syntax:
+
+\begin{verbatim}
+DELETE FROM <table name> WHERE <predicate>;
+\end{verbatim}
+
+Note that here the predicate might take the form:
+
+\begin{verbatim}
+<column name> IN (<value 1>, ..., <value n>)
+\end{verbatim}
+
+\verb IN  here is used to specify every value found \emph{in} a particular set of values.
+
+\section{Refining and Sorting Result Sets}
+
+\subsection{Searching with more general criteria}
+If you want to find data by matching more general criteria, you can modify the predicate of \verb|WHERE|.
+
+\begin{verbatim}
+WHERE <column name> LIKE 'R%';
+\end{verbatim}
+
+Here \% is a wildcard, and if the column selected has strings for the data type, those beginning with `R' will be returned.
+
+By the same token, you can specify numerical ranges for data in the following way:
+
+\begin{verbatim}
+SELECT <column name 1>, <column name 2> FROM <table name> WHERE
+ <column name 2> BETWEEN <lower number> AND <higher number>;
+\end{verbatim}
+
+\subsection{Ordering Result Sets}
+
+Use \verb|ORDER BY| to order a result set.
+
+\begin{verbatim}
+SELECT <column name> FROM <table name> ORDER BY <column name>;
+\end{verbatim}
+
+The keyword \verb|DESC| can be added at the end to switch the order to descending.
+
+If the column is numerical, you can specify \verb|ORDER BY <column number (in query)>| and the result set will be sorted according to the specified column's value.  Multiple ordering conditions can be included in sequence.
+
+\subsection{DISTINCT}
+If you want to eliminate redundant results, you can use \verb|DISTINCT|.
+
+\begin{verbatim}
+SELECT DISTINCT(<column name>) FROM <table name>;
+\end{verbatim}
+
+\subsection{GROUP BY}
+
+Result sets can be grouped using \verb|GROUP BY|.  For example the following query will first group the table according to similar <column name> entries, and then count the output for each (providing two columns, the distinct entries and number for each):
+
+\begin{verbatim}
+SELECT <column name>, count(<column name>) FROM <table name> 
+GROUP BY <column name>;
+\end{verbatim}
+
+To add a meaningful column label, we can add \verb|AS Count| after the \verb|count()| command to make the result set easier to understand.
+
+The result set can be further refined by adding \verb|HAVING <predicate>|:
+
+\begin{verbatim}
+SELECT <column name>, count(<column name>) FROM <table name> 
+GROUP BY <column name> HAVING <predicate>;
+\end{verbatim}
+
+\subsection{Specifying tables with AS}
+
+One can query multiple tables by denoting each table with a specified label (usually a letter) and the \verb|AS| clause. 
+
+\begin{verbatim}
+SELECT A.<column name 1>, B.<column name 2> FROM <table name 1> 
+AS A, <table name 2> AS B;
+\end{verbatim}
+
+\section{Built-in functions}
+Built-in functions can be used to get information from a database directly.  User-defined functions can be made.
+
+\subsection{Aggregate functions}
+\verb|AVG()|,
+\verb|MIN()|,
+\verb|MAX()|,
+\verb|SUM()|.
+
+
+\subsection{Scalar and string functions}
+\verb|ROUND()|,
+\verb|LENGTH()|,
+\verb|UCASE()|,
+\verb|LCASE()|.
+
+These can be used in the \verb|WHERE| clause, which can be useful if you are not sure whether data is upper or lower case, for example.
+
+Functions can be nested - one can be the input for another.
+
+\subsection{Date and time}
+\verb|DAY()|,
+\verb|MONTH()|,
+\verb|YEAR()|.
+
+You can perform arithmetic using dates - for example: 
+\begin{verbatim}
+SELECT <time column> + 3 DAYS FROM <table name>;
+\end{verbatim}
+
+You can also use the special registers \verb|CURRENT_DATE| and \verb|CURRENT_TIME|.
+
+\section{Sub-queries}
+Built-in functions cannot always be evaluated in a predicate. To circumvent this, it is often useful to include an entire \verb|SELECT| statement in parentheses where one might otherwise want to use a function.  As an example:
+
+\begin{verbatim}
+SELECT <column name> FROM <table name> WHERE <column name> < 
+(SELECT AVG(column name) < 10);
+\end{verbatim}
+
+Another option is column expressions where in place of a column name, a full \verb|SELECT| statement is included in parentheses.
+
+\begin{verbatim}
+SELECT <column name>,(SELECT <column name> FROM <table name>) 
+FROM <table name>;
+\end{verbatim}
+
+Table expressions can be used to define an instance of a table representing a subset of another:
+
+\begin{verbatim}
+SELECT * FROM (SELECT <column name 1>, <column name 2> FROM 
+<table name>) AS <new table name>; 
+FROM <table name>;
+\end{verbatim}
+
+\section{Querying multiple tables}
+
+An \emph{implicit join} is when multiple tables are included in the \verb|FROM| clause:
+
+\begin{verbatim}
+SELECT * FROM <table name 1>, <table name 2>;
+\end{verbatim}
+
+This results in a `full' or `Cartesian' join, where every row from the second table is joined with every row in the first.
+
+When using implicit joins, it is possible to refine the result set.  Columns should accessed with \verb|<table name>.<column name>| to account for the possibility that the same column name is found in each table.
+
+The names of tables can be defined in shorthand:
+
+\begin{verbatim}
+SELECT * FROM <table name 1> A, <table name 2> B 
+WHERE A.<column name 1> = B.<column name 2>;
+\end{verbatim}
+
+\section{Using python to work with SQL databases}
+
+DB API is a standard API for using python to work with databases (not only a particular flavor of SQL).
+
+There are two main concepts in working with a Python DB API:
+
+\emph{Connection object} - used to connect to databases and manage transactions.
+
+\emph{Cursor object} - used for queries, to scan through and retrieve result sets.
+
+As an example of connecting to a DB with python:
+
+\begin{verbatim}
+from dbmodule import connect
+
+#Create connection object
+
+Connection = connect('databasename','username','pswd')
+
+#Create a cursor object
+Cursor=connection.cursor()
+
+#Run Queries
+Cursor.execute('select*from mytable')
+Results=cursor.fetchall()
+
+#Free resources
+Cursor.close()
+Connection.close()
+\end{verbatim}
+
+\subsection{Working with ibm\_db and pandas}
+Tables can be created using the \verb|ibdm.exec_immediate()| function.  The arguments for the function are: \verb|idm.exec_immediate(conn,"<SQL query>")|.  Of course, here \verb|conn| is a connection object as described above.
+
+You can define a SQL statement and then pass it to another ibm\_db function:
+\begin{verbatim}
+statement = ibm_db.exec_immediate(conn,"SELECT * FROM table")
+
+ibm_db.fetch_both(statement)
+\end{verbatim}
+
+We can use pandas to load dataframes as well.
+
+\begin{verbatim}
+import pandas
+import ibm_db_dbi
+
+pconn = ibm_db_dbi.Connection(conn)
+df = pandas.read_sql('SELECT * FROM table', pconn)
+df
+\end{verbatim}
+\subsection{Magic statements}
+SQL queries can be easily entered using ``magic" commands in a Jupyter notebook:
+
+\verb|%load_ext sql|
+
+\verb|%sql select * from tablename|
+
+You can run an entire cell in Jupyter as SQL by adding \verb|%%sql| on the first line.
+
+Furthermore, you can take advantage of variables defined in Python in the scripts:
+
+\begin{verbatim}
+country1 = "USA"
+%sql select * from <table name> where country = :country1
+\end{verbatim}
+
+By the same token, you can assign the results of queries to python variables:
+
+\begin{verbatim}
+thing = %sql select * from <table name>
+\end{verbatim}
+
+\section{Obtaining table metadata}
+In order to get information about the tables in a relational database, one can use:
+
+\begin{verbatim}
+SELECT * FROM syscat.tables
+\end{verbatim}
+
+For example:
+\begin{verbatim}
+SELECT TABSCHEMA, TABNAME, CREATE_TIME FROM syscat.tables
+ WHERE TABSCHEMA = '<db2 username>'
+\end{verbatim}
+
+\end{document}
+

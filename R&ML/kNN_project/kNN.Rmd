@@ -1,0 +1,69 @@
+---
+title: "Breast Cancer ML"
+output: html_notebook
+---
+INSTRUCTIONS FOR R NOTEBOOKS:
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+install.packages("class")
+install.packages("gmodels")
+library("class")
+library("gmodels")
+wbcd = read.csv("wdbc.csv", stringsAsFactors=FALSE)
+#Drop the first row (the ids)
+wbcd = wbcd[-1]
+```
+Now we normalize the data (Hey, defining a function in R!)
+```{r}
+normalize = function(x) {
+  return ((x - min(x))/(max(x)-min(x)))
+}
+#Test on a vector:
+normalize(c(1,2,3,4,5))
+```
+We can now normalize the entire dataset:
+```{r}
+wbcd_n = as.data.frame(lapply(wbcd[2:31],normalize))
+
+#Look at summary statistics:
+summary(wbcd_n$area_mean)
+```
+Prepare for training:
+```{r}
+wbcd_train = wbcd_n[1:469,]
+wbcd_test = wbcd_n[470:569,]
+wbcd_train_labels = wbcd[1:469,1]
+wbcd_test_labels = wbcd[470:569,1]
+
+wbcd_test_pred = knn(train = wbcd_train, test = wbcd_test, cl = wbcd_train_labels, k=21)
+```
+Now we can make a CrossTable to check.  Note that the margins of the CrossTable are computed from the 1st and 4th elements of the cells.  The 1st element is the number of counts.  Since the total of all 4 cells is 100, the percentages given by the 4th elements in each cell are just the 1st element / 100.  The 2nd element is the row %, and the 3rd element is the column %.
+
+To interpret the meaning of each cell in the table body, note that the wbcd_test_labels indicate the truth while the the wbcd_test_pred indicates the prediction.  Therefore where these two columns agree in cell 1,1 and 2,2 we have have True Negatives and True Positives, respectively.  Cells 1,2 and 2,1 indicate "bad" predictions.  
+
+**Note** This kNN worked significantly better than the example shown in the text book.  
+
+```{r}
+CrossTable(x = wbcd_test_labels,y = wbcd_test_pred, prop.chisq=FALSE)
+```
+Next we can try to improve by using z-scaling.  This can be achieved with the scale() function, which can be applied directly to a data frame.
+
+```{r}
+wbcd_z = as.data.frame(scale(wbcd[-1]))
+summary(wbcd_z$area_mean)
+
+wbcd_train_z = wbcd_z[1:469,]
+wbcd_test_z = wbcd_z[470:569,]
+wbcd_train_labels = wbcd[1:469,1]
+wbcd_test_labels = wbcd[470:569,1]
+wbcd_test_pred_z = knn(train = wbcd_train_z, test = wbcd_test_z, cl = wbcd_train_labels, k=21)
+CrossTable(x = wbcd_test_labels,y=wbcd_test_pred_z, prop.chisq=FALSE)
+```
+It turns out that the performance is identical to above, unlike in Lantz's text.  
+```{r}
+
+```

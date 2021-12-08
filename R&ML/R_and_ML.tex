@@ -1,0 +1,90 @@
+\documentclass[]{article}
+\usepackage{amsmath}
+%opening
+\title{Notes on Machine Learning with R}
+\author{Will Steinhardt}
+
+\begin{document}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\maketitle
+
+\begin{abstract}
+These notes will summarize the basics of R and some basic machine learning concepts.  They are derived from \emph{Machine Learning with R} by Brett Lantz.
+\end{abstract}
+
+\section{Glossary of terms}
+\subsection*{Terms relating to R}
+\begin{itemize}
+	\item \textbf{vector} -- an object holding a collection of \emph{elements} that are all of the same type.
+	\item \textbf{factor} -- a data type intended for storing collections of variables belonging to a few different categories.
+	\item \textbf{list} -- a data type analogous to vectors where elements need not share the same type.
+	\item \textbf{data frame} -- a 2D table of values where rows represent samples and columns represent features, where columns may have different data types.
+	\item \textbf{array} -- a n-dimensional means of storing data of a singular data type.
+	\item \textbf{package} -- a collection of pre-written functions installed and loaded as a \emph{library}.
+\end{itemize}
+\subsection*{Terms relating to Machine Learning}
+\begin{itemize}
+	\item \textbf{nominal feature} -- a feature that is defined by a category (i.e. blood type)
+	\item \textbf{test samples} -- data which the neural network was not trained on.
+	\item \textbf{test accuracy} -- the rate at which the neural network accurately predicts the category for \emph{test} samples.
+	\item \textbf{regularization} -- efforts to stop a neural network from overfitting (capturing fine detail from the training samples).
+	\item \textbf{validation set} -- a set of data that is used to determine the current accuracy of the neural network outside of its training data.
+	\item \textbf{early stopping} -- a method of regularization by stopping once error plateaus on a validation set.
+	\item \textbf{dropout} -- a method of regularization where nodes are randomly turned off during training.  This effectively reduces the size of the neural network, and small networks are less likely to overfit than big ones. 
+	\item \textbf{batch learning} -- refers to the process of breaking samples up into batches so that gradient descent is performed over the average over deltas due to all samples in the batch.  This generally allows a larger alpha since the average delta is a better indicator of how to adjust weights to minimize error.
+	\item \textbf{activation functions} - functions that provide non-linearity to the action of the weights.  Common examples are \code{relu()}, \code{sigmoid()}, \code{softmax()}, and \code{tanh()}.  These functions and their derivatives should be monotonic, non-linear, and easily computed.  They are what allows \emph{sometimes correlation} in neural networks.
+	\item \textbf{bias-variance tradeoff} -- refers to the balance between overfitting and underfitting.
+\end{itemize}
+\section{Basic syntax and commands in R}
+\begin{description}
+	\item \code{install.packages("libraryName")} -- install the library.
+	\item \code{library(libraryName)} -- load the library into the current project environment. 
+	\item \code{<-} -- assign a value to a variable name, (works like = in other languages).
+	\item \verb|str(variable)| -- get information about structure of a variable - particularly useful for examining data frames.
+	\item \code{c(e1,e2,...,en)} -- combine elements into a vector.
+	\item \code{factor(c("e1","e2",...,"en"), levels=c("l1","l2",...,"lm"))} -- make a factor with the $n$ elements and $m$ levels. 
+	\item \verb|data.frame(v1,v2,...,vn),stringsAsFactors=FALSE)| -- make a dataframe using the previously defined $n$ vectors, specifying that strings will not be turned into factors.
+	\item \verb|dataframeName$columnName| -- access specific column in a data frame.
+	\item \verb|read.csv("mydata.csv", stringsAsFactors = FALSE, header = FALSE)| -- load a csv file without a header into a data frame. 
+	\item \verb|write.csv(dataframeName, file = "fileName.csv")| -- write a data frame to a csv file.
+\end{description}
+
+\section{k Nearest Neighbor (kNN) Classification}
+\emph{A machine learning approach that is simple, makes no assumptions about the underlying data, and has a fast training phase.  However, this approach yields no model, is slow at classifying, and requires a large amount of memory.}
+
+\emph{Works when ``you know it when you see it."}
+
+\vspace{0.2cm}
+
+
+The idea here is to use the Euclidian distance of an object in its space to classify it according to its $k$ nearest neighbors.
+
+In order to use kNN it is important to first rescale the features such that differences in each feature are equally represented.  For this, one typically uses min-max normalization.  Thus for each value of $X$ we determine $X_{scaled}$ as:
+
+$$
+X_{scaled} = \frac{X-X_{min}}{X_{max}-X_{min}}
+$$
+
+Alternatively, we can also use z-score standardization:
+
+$$
+X_{scaled} = \frac{X-\mu}{\sigma}
+$$
+
+where $\mu$ is the mean and $\sigma$ is the average.  The value of $X_{scaled}$ here is called the ``z-score'' and describes how many standard deviations the value is from the average.
+Nominal features can be ``dummy coded'' to treat them as numerical.  For $n$-category features, we use $(n-1)$ binary indicator variables.  For example, if the categories are red, blue, and green:
+
+\begin{equation}
+\text{red} =
+\begin{cases}
+	\text{1 if $x =$ red}\\
+	\text{0 otherwise}
+\end{cases}       
+\text{blue} = 
+\begin{cases}
+	\text{1 if $x =$ blue}\\
+	\text{0 otherwise}
+\end{cases}
+\end{equation}
+\end{document}
