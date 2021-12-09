@@ -87,4 +87,50 @@ Nominal features can be ``dummy coded'' to treat them as numerical.  For $n$-cat
 	\text{0 otherwise}
 \end{cases}
 \end{equation}
+
+\subsection{Implementing kNN in R}
+Implementing kNN has already been accomplished - one package that can be used is the \verb|class| package, which has a number of simple functions for classification.  Building a model for use with the kNN is unnecessary.  We just need to store the data in a format such that we can use it in the \verb|knn()| function.
+
+The arguments for this function go as follows:
+
+\begin{verbatim}
+prediction = knn(train = training_data, test = testing_data, 
+     cl = class, k = some_integer)
+\end{verbatim}
+
+Here the \verb|class| argument is a factor vector with the classes for each row in the training data.
+
+\subsection{Evaluating performance}
+
+It is useful to use \verb|CrossTable| to understand the quality of the prediction.  \verb|CrossTable()| can be found in the \verb|gmodels| package.
+
+We use: 
+\begin{verbatim}
+CrossTable(x = test_labels, y = test_pred, prop.chisq = FALSE)
+\end{verbatim}
+Note that if the two vectors \verb|test_labels| and \verb|test_pred| have two possible values, say benign (B) and malignant (M) as in the example cancer study, the CrossTable yields 4 cells indicating the four possible cases (B and predicted as B, B and predicted as M, M and predicted as B, and M and predicted as M).  Thus the better the kNN performs, the fewer the counts in the off-diagonals (where all the regular concerns about over-fitting in machine learning apply).  
+
+\section{Classification with Naive Bayes}
+
+\emph{A technique that offers the probability of an observation belonging to a particular class with some probability based on the values of its features.  This approach is handy when numerous attributes need to be considered simultaneously.  However, this approach relies on some assumptions (of equally important and independent features) that may be problematic.}
+
+First, some relevant vocabulary:
+\begin{itemize}
+\item \textbf{event} -- possible outcome.
+\item \textbf{trial} -- single opportunity for even to occur.
+\item \textbf{joint probability} -- $P(A \cap B)$ -- probability of both $A$ and $B$.
+\item \textbf{conditional probability} -- $P(A|B)$ -- probability of $A$ given $B$.  Note that this describes the fraction of B that is also A, whereas the joint probability describes the fraction of the total which are both A and B.
+\item \textbf{Baye's theorem} -- $P(A|B) = \frac{P(B|A)P(A)}{P(B)} = \frac{P(A \cap B)}{P(B)}$
+\item \textbf{prior probability} -- estimate of probability neglecting conditional probability and Baye's theorem.  I.e. supposing that 30\% of all animals have 4 legs, and 5\% of all animals are cows, if you are to guess whether an animal is a cow or not with no additional information, your estimate based on prior probability is simply 5\%.
+\item \textbf{likelihood} -- seems equivalent to ``conditional probability."
+\item \textbf{marginal likelihood} -- seems equivalent to ``prior probability."
+\item \textbf{posterior probability} -- conditional probability once we have additional evidence.
+\end{itemize}
+
+Bayes' theorem can be used by first generating a frequency table, where rows describe categories and columns represent features.  Each element counts the number of times the feature is observed in the given category.  Dividing each element by the total number of observations of the category yields the relevant conditional probability $P(\text{feature}|\text{category})$, and the resulting table is the likelihood table.
+
+\subsection{Naive Bayes' algorithm}
+
+
+
 \end{document}
