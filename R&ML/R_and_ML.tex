@@ -112,7 +112,7 @@ Note that if the two vectors \verb|test_labels| and \verb|test_pred| have two po
 
 \section{Classification with Naive Bayes}
 
-\emph{A technique that offers the probability of an observation belonging to a particular class with some probability based on the values of its features.  This approach is handy when numerous attributes need to be considered simultaneously.  However, this approach relies on some assumptions (of equally important and independent features) that may be problematic.}
+\emph{A technique that offers the probability of an observation belonging to a particular class based on the values of its features.  This approach is handy when numerous attributes need to be considered simultaneously.  However, this approach relies on some assumptions (of equally important and independent features) that may be problematic.}
 
 First, some relevant vocabulary:
 \begin{itemize}
@@ -131,6 +131,29 @@ Bayes' theorem can be used by first generating a frequency table, where rows des
 
 \subsection{Naive Bayes' algorithm}
 
+Suppose there are a number of different Boolean features that can be considered in a classification problem.  Constructing the likelihood table is still straightforward, but computing the conditional probability of a particular classification as the Boolean values are varied can become complex:
 
+$$
+P(C_1|F_1 \cap F_2 \cap F_3) = \frac{P(F_1 \cap F_2 \cap F_3|C_1)P(C_1)}{P(F_1 \cap F_2 \cap F_3)}
+$$
+
+The difficulty in computing this quantity precisely arises from the need to store all of the probabilities for the intersecting events - i.e. for calculating $P(F_1 \cap F_2 \cap F_3|C_1)$.  Note that this calculation does \emph{not} assume independence between events (and thus the likelihood table representation is not sufficient to allow for this calculation - rather, one would need a Venn diagram or equivalent).  However, the problem can be simplified by assuming class-conditional independence - events are independent for the same class value.  Thus, we assume 
+$$
+P(F_1 \cap F_2 \cap F_3|C_1) \approx P(F_1|C_1)P(F_2|C_1)P(F_3|C_1)
+$$
+
+Thus in the naive Bayes' algorithm Bayes' theorem can be rewritten as:
+$$
+P(C_1|F_1 \cap F_2 \cap F_3) \approx \frac{P(F_1|C_1)P(F_2|C_1)P(F_3|C_1)P(C_1)}{P(F_1)P(F_2)P(F_3)}
+$$
+
+Note that for different classifications $C_1$, $C_2$, ..., $C_n$ the denominator will always be the same.  Then only the numerators need to be calculated, and probabilities can be calculated by dividing each by the sum of the numerators, denoted $Z$, like the partition function.  This can all be written succinctly as:
+$$
+P(C_L|F1,...,F_n) \approx \frac{1}{Z}P(C_L)\prod_{i=1}^{n}P(F_i|C_L)
+$$
+
+\subsection{The Laplace Estimator}
+
+A possible issue with the naive Bayes' algorithm is the case where an event never occurs for one or more levels of the class. This then leads to a prediction of zero-probability due to the presence of the 0 in the product. The solution is to use the Laplace estimator, which just adds a small number (usually 1) to every count in the frequency table.
 
 \end{document}
